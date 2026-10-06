@@ -1,0 +1,29 @@
+; Master ledger - open this one in Fava:   .venv/bin/fava ledgers/main.beancount
+;
+; Each person has their own file. Scripts append new transactions to the file of the
+; entity they belong to (config.toml [entities.*].ledger) and never rewrite old text.
+;
+; Conventions used by the scripts:
+;   import_id: "..."        fingerprint of an imported statement line (dedup on re-import)
+;   receipt_id: "R..."      + link ^receipt-R...   ties a txn to sidecar.db receipt rows
+;   due: 2026-11-15         on any directive -> Google Calendar reminders (google_sync.py)
+;   #due-2026-11-15         same, as a tag (Beancount tags cannot contain ':')
+;   #gift / #spouse-transfer + tax_note:   inter-entity transfers (see config [transfers])
+
+option "title" "Family Ledger"
+option "operating_currency" "INR"
+option "render_commas" "TRUE"
+; Mutual fund units are redeemed first-in-first-out under Indian tax rules.
+option "booking_method" "FIFO"
+
+; Strict mode: every commodity must be declared in commodities.beancount.
+plugin "beancount.plugins.check_commodity"
+
+2020-01-01 custom "fava-option" "default-page" "income_statement/"
+2020-01-01 custom "fava-option" "currency-column" "70"
+
+include "commodities.beancount"
+include "self.beancount"
+include "wife.beancount"
+include "mom.beancount"
+include "prices.beancount"

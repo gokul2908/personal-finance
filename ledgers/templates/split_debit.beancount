@@ -1,0 +1,15 @@
+; Template: ONE bank debit that paid for several things.
+;
+; A ₹30,000 withdrawal that was ₹26,500 rent + ₹3,500 kept as cash. The bank leg is
+; the single debit exactly as it appears on the statement; every other leg is a part.
+; Generate one with:
+;   .venv/bin/python scripts/importer.py split --date 2026-09-01 --from Assets:Self:HDFC \
+;       --total 30000 --part Expenses:Self:Housing:Rent=26500 --part Assets:Self:Cash=3500 \
+;       --payee "Landlord" --narration "September rent + cash"
+; It refuses to write unless the parts add up to the total.
+
+2026-09-01 * "Landlord" "September rent + cash"
+  split_of: "30000.00"
+  Expenses:Self:Housing:Rent                     26500.00 INR
+  Assets:Self:Cash                                3500.00 INR
+  Assets:Self:HDFC                              -30000.00 INR

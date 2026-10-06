@@ -1,0 +1,32 @@
+; ============================================================================
+; MOM - gift capital and her own investment portfolio.
+;
+; Money from Self arrives as a gift from a relative: exempt in her hands
+; u/s 56(2)(x), and NOT clubbed with Self (s.64 covers spouse and minor children,
+; not parents). Income earned on it is hers. Transfers in are tagged #gift.
+; ============================================================================
+
+2020-01-01 open Assets:Mom:Savings                INR
+2020-01-01 open Assets:Mom:Clearing               INR
+2020-01-01 open Assets:Mom:FD                     INR
+2020-01-01 open Assets:Mom:MF:NiftyBees           NIFTYBEES
+
+2020-01-01 open Income:Mom:Interest               INR
+2020-01-01 open Income:Mom:CapitalGains           INR
+2020-01-01 open Expenses:Mom:Uncategorized        INR
+2020-01-01 open Expenses:Mom:Food:Groceries       INR
+2020-01-01 open Equity:Mom:Opening-Balances       INR
+
+; ---- Accounts the [[rules]] and the importer can post to
+2020-01-01 open Income:Mom:Salary                      INR
+2020-01-01 open Income:Mom:Cashback                    INR
+2020-01-01 open Income:Mom:Uncategorized               INR
+2020-01-01 open Expenses:Mom:Food:Dining               INR
+2020-01-01 open Expenses:Mom:Transport:Fuel            INR
+2020-01-01 open Expenses:Mom:Transport:Travel          INR
+2020-01-01 open Expenses:Mom:Shopping                  INR
+2020-01-01 open Expenses:Mom:Utilities                 INR
+2020-01-01 open Expenses:Mom:Fees:Bank                 INR
+2020-01-01 open Assets:Mom:Cash                        INR
+
+; ---- Transactions appended by the scripts go below this line.

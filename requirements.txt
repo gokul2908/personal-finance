@@ -1,0 +1,19 @@
+# Ledger
+beancount>=3.2
+beanquery>=0.2
+fava>=1.30
+# Statements
+pikepdf>=10.0
+pdfplumber>=0.11
+# Receipts / Ollama / prices
+pillow>=11.0
+requests>=2.32
+yfinance>=1.0
+# Google Calendar + Drive, secrets in the macOS Keychain
+google-api-python-client>=2.150
+google-auth-oauthlib>=1.2
+google-auth-httplib2>=0.2
+keyring>=25.0
+# Tests and the demo builder
+pytest>=8.0
+reportlab>=4.0

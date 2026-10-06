@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+config/config.toml
+data/raw_statements/*
+data/raw_receipts/*
+data/nudges/
+data/*.db
+demo/
+!data/raw_statements/.gitkeep
+!data/raw_receipts/.gitkeep

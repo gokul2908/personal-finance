@@ -1,0 +1,71 @@
+; ============================================================================
+; SELF - bank accounts, credit cards, wallets, reward points, insurance.
+; ============================================================================
+
+; ---- Banks & cash
+2020-01-01 open Assets:Self:HDFC                  INR
+2020-01-01 open Assets:Self:SBI                   INR
+2020-01-01 open Assets:Self:Cash                  INR
+; Transfers whose other half has not been imported yet wait here (see importer.py).
+2020-01-01 open Assets:Self:Clearing              INR
+; Cashback promised but not yet credited.
+2020-01-01 open Assets:Self:Receivable:Cashback   INR
+
+; ---- Wallets (idle balances here are what analytics.py prices at 7% p.a.)
+2020-01-01 open Assets:Self:Wallet:AmazonPay      INR
+2020-01-01 open Assets:Self:Wallet:Paytm          INR
+
+; ---- Credit cards (7-12 cards: one open line each, plus a [sources.*] block in config)
+2020-01-01 open Liabilities:Self:CC:HDFC-Regalia     INR
+2020-01-01 open Liabilities:Self:CC:SBI-Cashback     INR
+2020-01-01 open Liabilities:Self:CC:ICICI-AmazonPay  INR
+; 2020-01-01 open Liabilities:Self:CC:HDFC-Millennia   INR
+; 2020-01-01 open Liabilities:Self:CC:Axis-Ace          INR
+; 2020-01-01 open Liabilities:Self:CC:SBI-SimplyClick   INR
+; 2020-01-01 open Liabilities:Self:CC:ICICI-Coral       INR
+
+; ---- Reward points, each in its own commodity
+2020-01-01 open Assets:Self:Rewards:HDFC          HDFC_RP
+2020-01-01 open Assets:Self:Rewards:SBI           SBI_CASHBACK
+2020-01-01 open Assets:Self:Rewards:ICICI         ICICI_RP
+2020-01-01 open Income:Self:Rewards:HDFC          HDFC_RP
+2020-01-01 open Income:Self:Rewards:SBI           SBI_CASHBACK
+2020-01-01 open Income:Self:Rewards:ICICI         ICICI_RP
+
+; ---- Income
+2020-01-01 open Income:Self:Salary                INR
+2020-01-01 open Income:Self:Interest              INR
+2020-01-01 open Income:Self:Cashback              INR
+
+; ---- Expenses
+2020-01-01 open Expenses:Self:Food:Groceries      INR
+2020-01-01 open Expenses:Self:Food:Dining         INR
+2020-01-01 open Expenses:Self:Housing:Rent        INR
+2020-01-01 open Expenses:Self:Utilities           INR
+2020-01-01 open Expenses:Self:Transport:Fuel      INR
+2020-01-01 open Expenses:Self:Transport:Travel    INR
+2020-01-01 open Expenses:Self:Shopping            INR
+2020-01-01 open Expenses:Self:Insurance:Health    INR
+2020-01-01 open Expenses:Self:Insurance:Term      INR
+2020-01-01 open Expenses:Self:Insurance:Vehicle   INR
+2020-01-01 open Expenses:Self:Fees:Bank           INR
+2020-01-01 open Expenses:Self:Uncategorized       INR
+
+2020-01-01 open Equity:Self:Opening-Balances      INR
+
+; ---- Insurance renewals and other one-off due dates.
+; Any directive with `due:` metadata becomes two Google Calendar reminders
+; (7 and 2 days before). Card payment due days come from config `due_day`.
+;
+; 2026-01-15 custom "policy" "Health" "Star Health family floater"
+;   due: 2027-01-15
+;   premium: 24500
+; 2026-03-02 custom "policy" "Term" "HDFC Life Click 2 Protect"
+;   due: 2027-03-02
+; 2026-06-20 custom "policy" "Vehicle" "Car insurance - KA01 AB 1234"
+;   due: 2027-06-20
+
+; ---- Accounts the [[rules]] and the importer can post to
+2020-01-01 open Income:Self:Uncategorized              INR
+
+; ---- Transactions appended by the scripts go below this line.

@@ -1,0 +1,220 @@
+# Personal finance system configuration.
+#
+# Copy this file to config/config.toml (git-ignored) and edit it there. Scripts read
+# config.toml when it exists and fall back to this example otherwise.
+#
+# Personal details used to unlock statement PDFs (names, dates of birth, customer IDs)
+# are NOT kept here. They live in the macOS Keychain under service "personal-finance":
+#
+#   .venv/bin/python scripts/common.py secret set self.name     # e.g. "Gokul Kumar"
+#   .venv/bin/python scripts/common.py secret set self.dob      # YYYY-MM-DD
+#   .venv/bin/python scripts/common.py secret set mom.name
+#   .venv/bin/python scripts/common.py secret status
+
+[general]
+currency = "INR"
+default_entity = "self"
+
+# ---------------------------------------------------------------------------
+# Entities. `label` is the account segment (Assets:<label>:...) and `ledger` the
+# file under ledgers/ that new transactions for this entity are appended to.
+# ---------------------------------------------------------------------------
+[entities.self]
+label = "Self"
+ledger = "self.beancount"
+
+[entities.wife]
+label = "Wife"
+ledger = "wife.beancount"
+
+[entities.mom]
+label = "Mom"
+ledger = "mom.beancount"
+
+# ---------------------------------------------------------------------------
+# Statement sources. One block per card or bank account.
+#   parser  hdfc_cc | sbi_cc | icici_cc | bank_balance
+#   match   filename globs (case-insensitive) that identify this source's PDFs
+#   last4   used for PDF passwords that need it, and to identify the PDF when no glob matches
+# Card-only fields drive milestones.py and google_sync.py:
+#   anniversary       MM-DD the card year starts (card issue / renewal date)
+#   fee_waiver_spend  spend in a card year that waives the next annual fee
+#   milestone_counts  regex: a purchase counts when its other leg's account matches
+#                     (card fees under Expenses:*:Fees never count)
+#   milestone_exclude regexes on payee/narration that never count (fuel, rent, ...)
+#   reward_*          reward points are their own commodity (see commodities.beancount)
+#   due_day           payment due day-of-month, for calendar reminders
+# ---------------------------------------------------------------------------
+[sources.hdfc-regalia]
+kind = "card"
+entity = "self"
+parser = "hdfc_cc"
+account = "Liabilities:Self:CC:HDFC-Regalia"
+match = ["*regalia*.pdf", "*hdfc*credit*.pdf"]
+last4 = "0000"
+anniversary = "03-15"
+fee_waiver_spend = 400000
+annual_fee = 2500
+milestone_counts = "^(Expenses:(?!.*:Fees(:|$))|Assets:[^:]+:Wallet:)"
+milestone_exclude = ["(?i)\\bfuel\\b|petrol|\\bhpcl\\b|\\biocl\\b|\\bbpcl\\b", "(?i)\\brent\\b"]
+reward_commodity = "HDFC_RP"
+reward_account = "Assets:Self:Rewards:HDFC"
+reward_income = "Income:Self:Rewards:HDFC"
+reward_points = 4
+reward_per_inr = 150
+due_day = 5
+
+[sources.sbi-cashback]
+kind = "card"
+entity = "self"
+parser = "sbi_cc"
+account = "Liabilities:Self:CC:SBI-Cashback"
+match = ["*sbi*card*.pdf", "*sbicard*.pdf"]
+last4 = "0000"
+anniversary = "07-01"
+fee_waiver_spend = 200000
+annual_fee = 999
+milestone_counts = "^Expenses:(?!.*:Fees(:|$))"
+milestone_exclude = ["(?i)\\bfuel\\b|petrol", "(?i)\\brent\\b", "(?i)wallet|amazon pay"]
+reward_commodity = "SBI_CASHBACK"
+reward_account = "Assets:Self:Rewards:SBI"
+reward_income = "Income:Self:Rewards:SBI"
+reward_points = 5
+reward_per_inr = 100
+due_day = 20
+
+[sources.icici-amazon]
+kind = "card"
+entity = "self"
+parser = "icici_cc"
+account = "Liabilities:Self:CC:ICICI-AmazonPay"
+match = ["*icici*.pdf"]
+last4 = "0000"
+anniversary = "11-10"
+milestone_counts = "^Expenses:(?!.*:Fees(:|$))"
+due_day = 28
+
+[sources.self-hdfc-savings]
+kind = "bank"
+entity = "self"
+parser = "bank_balance"
+account = "Assets:Self:HDFC"
+match = ["*hdfc*acct*.pdf", "*hdfc*savings*.pdf"]
+
+[sources.mom-savings]
+kind = "bank"
+entity = "mom"
+parser = "bank_balance"
+account = "Assets:Mom:Savings"
+match = ["*mom*.pdf"]
+
+# ---------------------------------------------------------------------------
+# PDF password patterns per parser, tried in order, then `fallback`.
+# Placeholders (filled from Keychain + the source block):
+#   {name4_upper} {name4_lower} {name4_title}  first 4 letters of the first name
+#   {ddmm} {ddmmyy} {ddmmyyyy} {yyyy}            from the entity's date of birth
+#   {last4} {customer_id}
+# Issuers change these occasionally - check the line in the statement e-mail.
+# ---------------------------------------------------------------------------
+[passwords]
+hdfc_cc = ["{name4_upper}{ddmm}", "{name4_lower}{ddmm}"]
+icici_cc = ["{name4_lower}{ddmm}", "{name4_upper}{ddmm}"]
+sbi_cc = ["{ddmmyyyy}{last4}", "{ddmmyy}{last4}"]
+bank_balance = ["{customer_id}", "{name4_upper}{ddmm}", "{name4_lower}{ddmm}"]
+fallback = ["{name4_upper}{ddmm}", "{name4_lower}{ddmm}", "{ddmmyyyy}", "{ddmmyy}"]
+
+# ---------------------------------------------------------------------------
+# Categorisation rules, first match wins. {entity} becomes the entity label.
+# Unmatched spends go to Expenses:<Entity>:Uncategorized.
+# ---------------------------------------------------------------------------
+[[rules]]
+pattern = "(?i)salary|payroll"
+account = "Income:{entity}:Salary"
+
+[[rules]]
+pattern = "(?i)interest"
+account = "Income:{entity}:Interest"
+
+[[rules]]
+pattern = "(?i)swiggy|zomato|eatsure"
+account = "Expenses:{entity}:Food:Dining"
+
+[[rules]]
+pattern = "(?i)dmart|avenue supermarts|kpn|smart ?point|\\bcsd\\b|bigbasket|zepto|blinkit"
+account = "Expenses:{entity}:Food:Groceries"
+
+[[rules]]
+pattern = "(?i)\\bfuel\\b|petrol|\\bhpcl\\b|\\biocl\\b|\\bbpcl\\b"
+account = "Expenses:{entity}:Transport:Fuel"
+
+[[rules]]
+pattern = "(?i)uber|ola|rapido|irctc|metro"
+account = "Expenses:{entity}:Transport:Travel"
+
+[[rules]]
+pattern = "(?i)amazon|flipkart|myntra|ajio"
+account = "Expenses:{entity}:Shopping"
+
+[[rules]]
+pattern = "(?i)airtel|jio|bescom|electricity|act fibernet|broadband"
+account = "Expenses:{entity}:Utilities"
+
+[[rules]]
+pattern = "(?i)annual fee|membership fee|late fee|finance charge|gst on"
+account = "Expenses:{entity}:Fees:Bank"
+
+# ---------------------------------------------------------------------------
+# Transfers. Two lines from different accounts with the same absolute amount, opposite
+# direction and dates within `window_days` become ONE transaction - but only when BOTH
+# descriptions match `keywords`, so an unrelated ₹500 refund never pairs with a ₹500
+# spend. UPI is deliberately NOT a keyword: most UPI lines are shop payments.
+# A keyword line whose other half has not been imported yet (either side first) goes
+# through Assets:<Entity>:Clearing, so the books stay balanced; the Clearing balance is
+# the list of transfers still waiting for their other half.
+# ---------------------------------------------------------------------------
+[transfers]
+window_days = 2
+keywords = "(?i)\\bneft\\b|\\bimps\\b|\\brtgs\\b|transfer|\\btrf\\b|payment received|thank you|\\bbbps\\b|autopay|billdesk|cc payment|card payment"
+
+[transfers.notes."self->mom"]
+tag = "gift"
+tax_note = "Gift from a relative u/s 56(2)(x): exempt in Mom's hands; no clubbing - income on it is hers"
+
+[transfers.notes."self->wife"]
+tag = "spouse-transfer"
+tax_note = "Transfer to spouse without consideration: income on it is clubbed with Self u/s 64(1)(iv)"
+
+# ---------------------------------------------------------------------------
+[receipts]
+expense_account = "Expenses:{entity}:Food:Groceries"
+default_paid_with = "Assets:Self:Cash"
+# Accept a receipt when sum(items) is within this many rupees of the printed total;
+# beyond that it is still recorded, flagged "!" for review.
+total_tolerance = 2.0
+max_image_side = 1600
+
+[ollama]
+# Local: http://localhost:11434   Cloud: https://ollama.com (set OLLAMA_API_KEY or
+# `common.py secret set ollama.api_key`). OLLAMA_HOST in the environment wins.
+host = "http://localhost:11434"
+vision_model = "gemma3:4b"
+text_model = "gemma3:4b"
+timeout_seconds = 300
+max_retries = 2
+
+[analytics]
+idle_rate = 0.07
+idle_accounts = ["^Assets:[^:]+:Wallet:"]
+inflation_threshold = 0.15
+inflation_recent_days = 28
+inflation_baseline_days = 112
+
+[google]
+calendar_id = "primary"
+reminder_offsets = [7, 2]
+horizon_days = 60
+drive_folder = "personal-finance-backup"
+# Reuse the desktop OAuth client already stored for salary-invoice; this project keeps
+# its own sign-in token (service "personal-finance", item "google-token").
+client_keychain_service = "salary-invoice"
+client_keychain_item = "calendar-client"

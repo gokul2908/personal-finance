@@ -1,0 +1,2 @@
+; Market prices, appended by scripts/prices.py (AMFI NAVs and yfinance closes).
+; Do not hand-edit lines below; re-running the script skips dates already present.

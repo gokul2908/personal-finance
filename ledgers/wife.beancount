@@ -1,0 +1,39 @@
+; ============================================================================
+; WIFE - savings and ET Money mutual fund investments.
+;
+; Tax note: if money for these investments came from Self as a gift, income on it is
+; clubbed with Self u/s 64(1)(iv). Transfers from Self are tagged #spouse-transfer
+; with a tax_note so the source of funds is visible later.
+; ============================================================================
+
+2020-01-01 open Assets:Wife:Savings               INR
+2020-01-01 open Assets:Wife:Clearing              INR
+2020-01-01 open Assets:Wife:Wallet:AmazonPay      INR
+
+; ET Money holdings: one account per fund, units held at cost (FIFO for redemptions).
+2020-01-01 open Assets:Wife:ETMoney:PPFAS-FlexiCap MF122639
+
+2020-01-01 open Income:Wife:Interest              INR
+2020-01-01 open Income:Wife:CapitalGains          INR
+2020-01-01 open Expenses:Wife:Uncategorized       INR
+2020-01-01 open Equity:Wife:Opening-Balances      INR
+
+; Example SIP purchase (units {cost per unit}):
+; 2026-09-05 * "ET Money" "SIP - Parag Parikh Flexi Cap"
+;   Assets:Wife:ETMoney:PPFAS-FlexiCap   65.432 MF122639 {76.42 INR}
+;   Assets:Wife:Savings                 -5000.31 INR
+
+; ---- Accounts the [[rules]] and the importer can post to
+2020-01-01 open Income:Wife:Salary                     INR
+2020-01-01 open Income:Wife:Cashback                   INR
+2020-01-01 open Income:Wife:Uncategorized              INR
+2020-01-01 open Expenses:Wife:Food:Groceries           INR
+2020-01-01 open Expenses:Wife:Food:Dining              INR
+2020-01-01 open Expenses:Wife:Transport:Fuel           INR
+2020-01-01 open Expenses:Wife:Transport:Travel         INR
+2020-01-01 open Expenses:Wife:Shopping                 INR
+2020-01-01 open Expenses:Wife:Utilities                INR
+2020-01-01 open Expenses:Wife:Fees:Bank                INR
+2020-01-01 open Assets:Wife:Cash                       INR
+
+; ---- Transactions appended by the scripts go below this line.

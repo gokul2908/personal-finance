@@ -1,0 +1,34 @@
+; Commodities. Reward points are their own commodity so a point balance is never
+; mistaken for rupees; a `price` directive values them when you want INR totals.
+;
+; Market-priced holdings carry the identifier scripts/prices.py fetches with:
+;   amfi: "<scheme code>"   AMFI NAV (mutual funds)      - from amfiindia.com NAVAll.txt
+;   yahoo: "<ticker>"       yfinance close (equities)    - e.g. "RELIANCE.NS"
+
+2020-01-01 commodity INR
+  name: "Indian Rupee"
+
+2020-01-01 commodity HDFC_RP
+  name: "HDFC credit card reward points"
+
+2020-01-01 commodity SBI_CASHBACK
+  name: "SBI Card cashback accrued, credited next statement (1 unit = 1 INR)"
+
+2020-01-01 commodity ICICI_RP
+  name: "ICICI credit card reward points"
+
+; Example mutual fund (replace with the real holdings). Commodity names must start
+; with a letter, so AMFI scheme codes are prefixed with MF.
+2020-01-01 commodity MF122639
+  name: "Parag Parikh Flexi Cap Fund - Direct Plan - Growth"
+  amfi: "122639"
+
+; Example equity:
+2020-01-01 commodity NIFTYBEES
+  name: "Nippon India ETF Nifty 50 BeES"
+  yahoo: "NIFTYBEES.NS"
+
+; Reward point values (INR per point) for net-worth reports. Update when they change.
+2020-01-01 price HDFC_RP       0.50 INR
+2020-01-01 price SBI_CASHBACK  1.00 INR
+2020-01-01 price ICICI_RP      0.25 INR

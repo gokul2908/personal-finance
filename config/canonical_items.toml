@@ -1,0 +1,205 @@
+# Canonical grocery items. A receipt line is matched against `patterns` (regex,
+# case-insensitive, first match in file order wins) after the store's raw text.
+# `unit` is the base unit quantities are stored in: kg, l or pcs. Pack sizes printed
+# in the name ("500g", "1 L", "6x200ml") are converted to that unit.
+#
+# Lines that match nothing are stored with needs_review = 1. Teach the mapping once:
+#   receipt_engine.py map "TATA SAMPANN TOOR DAL 1KG" --to "Toor Dal" --category Pulses --unit kg
+# and the same raw text maps automatically from then on (kept in sidecar.db).
+
+[[item]]
+name = "Dates"
+category = "Dry Fruits"
+unit = "kg"
+patterns = ["\\bdates?\\b", "khajur", "kharjura", "\\bkimia\\b"]
+
+[[item]]
+name = "Almonds"
+category = "Dry Fruits"
+unit = "kg"
+patterns = ["almond", "badam"]
+
+[[item]]
+name = "Cashew"
+category = "Dry Fruits"
+unit = "kg"
+patterns = ["cashew", "kaju"]
+
+[[item]]
+name = "Raisins"
+category = "Dry Fruits"
+unit = "kg"
+patterns = ["raisin", "kishmish", "dry grapes"]
+
+[[item]]
+name = "Tomato"
+category = "Vegetables"
+unit = "kg"
+patterns = ["tomato"]
+
+[[item]]
+name = "Onion"
+category = "Vegetables"
+unit = "kg"
+patterns = ["\\bonions?\\b"]
+
+[[item]]
+name = "Potato"
+category = "Vegetables"
+unit = "kg"
+patterns = ["potato", "\\baloo\\b"]
+
+[[item]]
+name = "Banana"
+category = "Fruits"
+unit = "kg"
+patterns = ["banana", "robusta", "yelakki"]
+
+[[item]]
+name = "Apple"
+category = "Fruits"
+unit = "kg"
+patterns = ["\\bapples?\\b"]
+
+[[item]]
+name = "Milk"
+category = "Dairy"
+unit = "l"
+patterns = ["\\bmilk\\b(?!.*(powder|biscuit|chocolate))"]
+
+[[item]]
+name = "Curd"
+category = "Dairy"
+unit = "kg"
+patterns = ["\\bcurd\\b", "\\bdahi\\b", "yogh?urt"]
+
+[[item]]
+name = "Paneer"
+category = "Dairy"
+unit = "kg"
+patterns = ["paneer"]
+
+[[item]]
+name = "Ghee"
+category = "Dairy"
+unit = "l"
+patterns = ["\\bghee\\b"]
+
+[[item]]
+name = "Butter"
+category = "Dairy"
+unit = "kg"
+patterns = ["\\bbutter\\b(?!.*(cookie|biscuit|milk))"]
+
+[[item]]
+name = "Eggs"
+category = "Dairy"
+unit = "pcs"
+patterns = ["\\beggs?\\b"]
+
+[[item]]
+name = "Rice"
+category = "Staples"
+unit = "kg"
+patterns = ["\\brice\\b", "basmati", "sona masoori", "ponni"]
+
+[[item]]
+name = "Wheat Flour"
+category = "Staples"
+unit = "kg"
+patterns = ["\\batta\\b", "wheat flour", "chakki"]
+
+[[item]]
+name = "Toor Dal"
+category = "Pulses"
+unit = "kg"
+patterns = ["toor", "tur dal", "arhar"]
+
+[[item]]
+name = "Moong Dal"
+category = "Pulses"
+unit = "kg"
+patterns = ["moong", "mung"]
+
+[[item]]
+name = "Sugar"
+category = "Staples"
+unit = "kg"
+patterns = ["\\bsugar\\b(?!.*free)"]
+
+[[item]]
+name = "Salt"
+category = "Staples"
+unit = "kg"
+patterns = ["\\bsalt\\b"]
+
+[[item]]
+name = "Sunflower Oil"
+category = "Oils"
+unit = "l"
+patterns = ["sunflower", "sunpure", "\\bfreedom\\b.*oil"]
+
+[[item]]
+name = "Groundnut Oil"
+category = "Oils"
+unit = "l"
+patterns = ["groundnut oil", "peanut oil"]
+
+[[item]]
+name = "Tea"
+category = "Beverages"
+unit = "kg"
+patterns = ["\\btea\\b", "chai"]
+
+[[item]]
+name = "Coffee"
+category = "Beverages"
+unit = "kg"
+patterns = ["coffee", "filter kaapi"]
+
+[[item]]
+name = "Bread"
+category = "Bakery"
+unit = "pcs"
+patterns = ["\\bbread\\b"]
+
+[[item]]
+name = "Detergent"
+category = "Household"
+unit = "kg"
+patterns = ["detergent", "surf excel", "\\bariel\\b", "\\btide\\b", "\\brin\\b"]
+
+[[item]]
+name = "Dishwash"
+category = "Household"
+unit = "l"
+patterns = ["dishwash", "\\bvim\\b", "\\bpril\\b", "exo\\b"]
+
+[[item]]
+name = "Toothpaste"
+category = "Personal Care"
+unit = "kg"
+patterns = ["toothpaste", "colgate", "pepsodent", "sensodyne", "close ?up"]
+
+[[item]]
+name = "Bath Soap"
+category = "Personal Care"
+unit = "pcs"
+patterns = ["\\bsoap\\b", "lifebuoy", "\\bdove\\b", "mysore sandal", "\\bpears\\b"]
+
+# Brands are recognised (and stripped from the canonical name) when they appear
+# as whole words in the raw line.
+[brands]
+known = ["Lion", "Tata", "Tata Sampann", "Aashirvaad", "Amul", "Fortune", "Saffola",
+         "Nandini", "Heritage", "Britannia", "Haldiram", "Mother Dairy", "Premia",
+         "DMart", "Freedom", "Sunpure", "Gold Winner", "Brooke Bond", "Red Label",
+         "Bru", "Nescafe", "Everest", "MDH", "Patanjali", "Surf Excel", "Ariel", "Tide",
+         "Vim", "Colgate", "Dove", "Lifebuoy", "Modern", "Milky Mist", "Akshayakalpa",
+         "Happilo", "Nutraj", "Farmley", "India Gate", "Daawat", "Catch", "Organic Tattva"]
+
+# Store names as the model may read them -> canonical store.
+[stores]
+"DMart" = ["d[\\s-]?mart", "avenue supermarts"]
+"KPN" = ["\\bkpn\\b", "kpn fresh"]
+"Smart Point" = ["smart\\s?point"]
+"Army CSD" = ["\\bcsd\\b", "canteen stores", "unit run canteen", "\\burc\\b"]
