@@ -60,14 +60,16 @@ run `importer.py import FILE --dump-text --dry-run` and adjust that bank's profi
 
 **Duplicates.** Each line's fingerprint is stored as `import_id`; re-importing is a no-op.
 A line matching a hand-entered transaction (receipt, gift-card load, split; anything
-without an `import_id`) on the same account and amount within ±2 days is skipped.
+without an `import_id`, except opening balances) on the same account and amount within
+±2 days is skipped, and a `note` records the match so that entry is used only once.
+A receipt ingested after its statement attaches to the imported line instead.
 
-**Transfers.** Same amount, opposite direction, different accounts, within ±2 days, a
-transfer keyword on one side -> one transaction (`Assets:Self:HDFC -> Assets:Mom:Savings`),
+**Transfers.** Same amount, opposite direction, different accounts, within ±2 days, and a
+transfer keyword (NEFT/IMPS/RTGS/BBPS/payment received...; not UPI) on BOTH sides -> one transaction (`Assets:Self:HDFC -> Assets:Mom:Savings`),
 tagged per direction from `[transfers.notes]`: `#gift` + s.56(2)(x) note to Mom,
 `#spouse-transfer` + s.64(1)(iv) clubbing note to Wife. A transfer whose other half is
-not imported yet waits in `Assets:<Entity>:Clearing` and is closed off when it arrives.
-Two equally good partners -> flagged `!` for review.
+not imported yet - whichever statement comes first - waits in `Assets:<Entity>:Clearing`
+and is closed off when it arrives. A line with more than one possible partner is flagged `!`.
 
 **Split debits.** `importer.py split --from ACC --total N --part ACC=AMT ...` refuses
 parts that do not add up. Template: `ledgers/templates/split_debit.beancount`.
