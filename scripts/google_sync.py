@@ -1,5 +1,6 @@
 """Google Calendar reminders for due dates, and Google Drive backup of the books.
 
+    google_sync.py import-client client_secret.json   # once: store the OAuth client
     google_sync.py auth                    # one-time browser sign-in (click Allow)
     google_sync.py remind [--apply] [--horizon 60] [--date D]
     google_sync.py backup [--apply]
@@ -19,8 +20,9 @@ Backup uploads ledgers/**/*.beancount and a consistent snapshot of sidecar.db in
 one Drive folder, skipping files whose MD5 already matches. Scope is drive.file: the
 app can only see files it created.
 
-Auth reuses the desktop OAuth client already in the Keychain for salary-invoice and
-keeps this project's own token (service "personal-finance", item "google-token").
+The OAuth client and the sign-in token both live in the Keychain (service
+"personal-finance", items "google-client" and "google-token"). [google] in config can
+point the client at another Keychain item instead.
 """
 from __future__ import annotations
 
@@ -43,6 +45,7 @@ from common import (KEYCHAIN_SERVICE, PFError, ledger_dir, load_config, parse_da
 SCOPES = ["https://www.googleapis.com/auth/calendar.events",
           "https://www.googleapis.com/auth/drive.file"]
 TOKEN_ITEM = "google-token"
+CLIENT_ITEM = "google-client"
 DUE_TAG = re.compile(r"^due-(\d{4}-\d{2}-\d{2})$")
 
 
@@ -166,11 +169,11 @@ def credentials(allow_browser: bool = False):
                 raise PFError(f"Google sign-in expired ({ex}) - run: google_sync.py auth")
     if not allow_browser:
         raise PFError("no Google sign-in stored - run: google_sync.py auth")
-    client = keyring.get_password(cfg.get("client_keychain_service", "salary-invoice"),
-                                  cfg.get("client_keychain_item", "calendar-client"))
+    client = keyring.get_password(cfg.get("client_keychain_service", KEYCHAIN_SERVICE),
+                                  cfg.get("client_keychain_item", CLIENT_ITEM))
     if not client:
-        raise PFError("no OAuth client in the Keychain - set [google].client_keychain_service/item "
-                      "to a stored desktop-app client JSON")
+        raise PFError("no OAuth client stored - download a Desktop-app OAuth client JSON from Google "
+                      "Cloud and run: google_sync.py import-client client_secret.json")
     flow = InstalledAppFlow.from_client_config(json.loads(client), SCOPES)
     creds = flow.run_local_server(port=0, open_browser=True, prompt="consent",
                                   authorization_prompt_message="Opening browser for Google sign-in...\n")
@@ -273,6 +276,22 @@ def push_backup(files: list[tuple[str, Path]], folder_name: str, svc=None) -> di
 
 # --------------------------------------------------------------------------- CLI
 
+def cmd_import_client(args) -> int:
+    """Store a downloaded client_secret JSON in the Keychain (validated first)."""
+    import keyring
+    try:
+        client = json.loads(Path(args.path).read_text())
+    except (OSError, ValueError) as ex:
+        raise PFError(f"{args.path}: cannot read a JSON file ({ex})")
+    if "installed" not in client:
+        raise PFError(f"{args.path} is not a Desktop-app OAuth client (create one with "
+                      "application type 'Desktop app')")
+    keyring.set_password(KEYCHAIN_SERVICE, CLIENT_ITEM, json.dumps(client))
+    print(f"stored the OAuth client in the Keychain ({KEYCHAIN_SERVICE} / {CLIENT_ITEM}); "
+          f"you can delete {args.path} now. Next: google_sync.py auth")
+    return 0
+
+
 def cmd_auth(_args) -> int:
     credentials(allow_browser=True)
     print("Google sign-in stored in the Keychain (personal-finance / google-token)")
@@ -317,6 +336,8 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("-v", "--verbose", action="store_true")
     sub = p.add_subparsers(dest="cmd", required=True)
+    ic = sub.add_parser("import-client", help="store a Desktop-app OAuth client JSON in the Keychain")
+    ic.add_argument("path")
     sub.add_parser("auth")
     r = sub.add_parser("remind")
     r.add_argument("--apply", action="store_true")
@@ -326,7 +347,8 @@ def main() -> int:
     b.add_argument("--apply", action="store_true")
     args = p.parse_args()
     setup_logging(args.verbose)
-    return {"auth": cmd_auth, "remind": cmd_remind, "backup": cmd_backup}[args.cmd](args)
+    return {"import-client": cmd_import_client, "auth": cmd_auth, "remind": cmd_remind,
+            "backup": cmd_backup}[args.cmd](args)
 
 
 if __name__ == "__main__":

@@ -214,7 +214,8 @@ calendar_id = "primary"
 reminder_offsets = [7, 2]
 horizon_days = 60
 drive_folder = "personal-finance-backup"
-# Reuse the desktop OAuth client already stored for salary-invoice; this project keeps
-# its own sign-in token (service "personal-finance", item "google-token").
-client_keychain_service = "salary-invoice"
-client_keychain_item = "calendar-client"
+# The OAuth client is read from the Keychain item stored by
+# `google_sync.py import-client` (service "personal-finance", item "google-client").
+# To reuse a client stored by another tool instead, name its Keychain item:
+# client_keychain_service = "salary-invoice"
+# client_keychain_item = "calendar-client"
